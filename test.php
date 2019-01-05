@@ -1,9 +1,10 @@
 <?php
-include("./lib/autoload.php");
-include("./lib/exelReader.php");	
-include("./lib/simple_html_dom.php");	
-include("./csv/index.php");
-
+include __DIR__ . DIRECTORY_SEPARATOR ."lib/exelReader.php";	
+include __DIR__ . DIRECTORY_SEPARATOR ."lib/simple_html_dom.php";	
+include __DIR__ . DIRECTORY_SEPARATOR ."csv/index.php";
+spl_autoload_register(function ($class_name) {
+    include __DIR__ . DIRECTORY_SEPARATOR ."lib/".$class_name . '.php';
+});
 set_time_limit(0);
 
 $xpath_product_link = "//div[@class='nd__line nd__masView--about']/a[@class='nd__tabView--name nd__masView--name']";

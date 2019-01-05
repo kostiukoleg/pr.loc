@@ -1,9 +1,11 @@
 <?php
+include __DIR__ . DIRECTORY_SEPARATOR ."lib/exelReader.php";	
+include __DIR__ . DIRECTORY_SEPARATOR ."lib/simple_html_dom.php";	
+include __DIR__ . DIRECTORY_SEPARATOR ."csv/index.php";
 
-include("./lib/autoload.php");
-include("./lib/exelReader.php");	
-include("./lib/simple_html_dom.php");	
-include("./csv/index.php");
+spl_autoload_register(function ($class_name) {
+    include __DIR__ . DIRECTORY_SEPARATOR ."lib/".$class_name . '.php';
+});
 
 set_time_limit(0);
 
@@ -79,18 +81,16 @@ for($i = 1; $i < count($data); $i++) {
 
 		if( $k == 0 && !empty($prop_arr[$k]) ){
 			$prop = "{$prop_arr[$k]}[prop attr=телефон]=[type=assortmentCheckBox value={$prop_arr[$k+1]}##1## product_margin={$prop_arr[$k+1]}## activity=1 filter=1 description=]";
-			echo "YES";
 		} else {
 			if($k%2==0 && !empty($prop_arr[$k])){
 				$prop .= "&{$prop_arr[$k]}[prop attr=телефон]=[type=assortmentCheckBox value={$prop_arr[$k+1]}##1## product_margin={$prop_arr[$k+1]}## activity=1 filter=1 description=]";
 			}
-			echo "NO";
 		}
 	}     
 
-	$main_arr["property"] = $prop."&Бренд[prop attr=телефон]=[type=assortmentCheckBox value={$data[$i][4]}##1## product_margin={$data[$i][4]}## activity=1 filter=1 description=]";
+	$main_arr["property"] = $prop."&Бренд[prop attr=телефон]=[type=assortmentCheckBox value={$data[$i][1]}##1## product_margin={$data[$i][1]}## activity=1 filter=1 description=]";
 	$prop = "";
-exit();
+
 	$category = $data[$i][2]; //Категория товара "Компьютерная техника/Компьютеры и ноутбуки/Ноутбуки"
 	$url_category = $data[$i][3]; //URL категории
 	$goods = $data[$i][4]; //Товар "Ноутбук Dell Inspiron N411Z"
@@ -127,6 +127,6 @@ exit();
 	$currency = "RUR"; //Валюта
 	$propertis = mb_convert_encoding($main_arr["property"], 'windows-1251');
 	$csv->setCSV(array("~$articul~$category~$url_category~$goods~$options~~$description~$price~$old_price~$url~$img~$count~$activity~$title_seo~$kay_words~$description_seo~$reccomend~$new~$sort~$weight~$bind_articul~$neibor_category~$link_goods~$currency~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~$propertis"));
-	//print_r($goods);
+
 }
 ?>
