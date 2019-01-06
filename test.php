@@ -25,6 +25,15 @@ if (!extension_loaded('openssl')) {
 	dl('php_openssl.dll');
 }
 
+if(file_exists(__DIR__ . DIRECTORY_SEPARATOR ."parse_cat.csv")){
+	$parse_cat = new CSV(__DIR__ . DIRECTORY_SEPARATOR ."parse_cat.csv");
+
+	$parse_cat_data = $parse_cat->getCSV();
+}
+
+$parse_cat_link = $parse_cat_data[1][0];
+$cat_str = mb_convert_encoding( $parse_cat_data[1][1], 'UTF-8' , 'windows-1251');
+$cat_url = $parse_cat_data[1][2];
 $xpath_product_link = "//div[@class='nd__line nd__masView--about']/a[@class='nd__tabView--name nd__masView--name']";
 $xpath_product_category = "//div[@id='ajax_breadcrumbs']";
 $xpath_title = "//div[@class='nd__line nd__masView--about']/a[@class='nd__tabView--name nd__masView--name']";
@@ -40,11 +49,11 @@ if(file_exists(__DIR__ . DIRECTORY_SEPARATOR ."tempfile/test.csv")){
 
 fopen(__DIR__ . DIRECTORY_SEPARATOR ."tempfile/test.csv", "a");
 
-$csv = new CSV(__DIR__ . DIRECTORY_SEPARATOR ."tempfile/test.csv");
+$test = new CSV(__DIR__ . DIRECTORY_SEPARATOR ."tempfile/test.csv");
 
-$csv->setCSV(Array(mb_convert_encoding("links~brands~categories~categories_url~title~price~articul~main_img", 'windows-1251', 'UTF-8')));
+$test->setCSV(Array(mb_convert_encoding("links~brands~categories~categories_url~title~price~articul~main_img", 'windows-1251', 'UTF-8')));
 
-$h = Func::parseSite("https://msk.megabitcomp.ru/catalog/mobilnye_telefony/");
+$h = Func::parseSite($parse_cat_link);
 
 $x = new DOMXpath($h);
 
@@ -58,7 +67,7 @@ for ($i = 1; $i <= $x->query("//*/div[@class='nd__filter--list js-filtersList bx
 		
 		preg_match ("#filters\[brand\]\[([a-zA-Z' '()]+)\]$#", $x->query("//*/div[@class='nd__filter--list js-filtersList bx_filter_block']")->item(0)->childNodes->item($i)->childNodes->item(1)->getAttribute("name"), $brand);
 		
-		$s_url = "https://msk.megabitcomp.ru/catalog/mobilnye_telefony/?filters%5Bbrand%5D%5B".urlencode($brand[1])."%5D=Y";
+		$s_url = $parse_cat_link."?filters%5Bbrand%5D%5B".urlencode($brand[1])."%5D=Y";
 		
 		$b = $brand[1];
 
@@ -96,15 +105,15 @@ for ($i = 1; $i <= $x->query("//*/div[@class='nd__filter--list js-filtersList bx
 
 					$links = "https://reg.megabitcomp.ru".$xpath->query($xpath_product_link)->item($j)->getAttribute("href");
 					$brands = $b;
-					$categories = "Мобильная связь и телефония/".mb_convert_encoding($brands, 'windows-1252', 'UTF-8');//str_replace("Каталог товаров/", "", mb_convert_encoding(preg_replace( "/\s{2,}/", "", $xpath->query($xpath_product_category)->item(0)->textContent), 'windows-1252', 'UTF-8'))
-					$categories_url = "mobilnaya-svyaz-i-telefoniya-mobilnye-telefony-smartfony/".strtolower(Func::translitIt($brands));
+					$categories = $cat_str.mb_convert_encoding($brands, 'windows-1252', 'UTF-8');//str_replace("Каталог товаров/", "", mb_convert_encoding(preg_replace( "/\s{2,}/", "", $xpath->query($xpath_product_category)->item(0)->textContent), 'windows-1252', 'UTF-8'))
+					$categories_url = $cat_url.strtolower(Func::translitIt($brands));
 					$title = preg_replace( "/\s{2,}/", "", mb_convert_encoding($xpath->query($xpath_product_link)->item($j)->nodeValue, 'windows-1252', 'UTF-8'));
 					$price = preg_replace( "/\s{2,}р./", "", mb_convert_encoding($xpath->query($xpath_price)->item($j)->nodeValue, 'windows-1252', 'UTF-8'));
 					$articul = preg_replace( "/Артикул: /", "", mb_convert_encoding($xpath->query($xpath_product_articul)->item($j)->nodeValue, 'windows-1252', 'UTF-8'));		
 					$src = preg_replace( "/resize\/223x170\//", "", $xpath->query($xpath_img)->item($j)->getAttribute("src"));		
 					$src = preg_replace( "/https\:\/\/office.megabitcomp.ru\/megabit_pic\/[0{4,}\-?]{5,}\.jpg$/", "70_no-img.jpg", $src);	
 					$main_img = $src;	
-					$csv->setCSV(array(mb_convert_encoding("$links~$brands~$categories~$categories_url~$title~$price~$articul~$main_img", 'windows-1251', 'UTF-8')));
+					$test->setCSV(array(mb_convert_encoding("$links~$brands~$categories~$categories_url~$title~$price~$articul~$main_img", 'windows-1251', 'UTF-8')));
 					
 					print_r($title."\n");
 				}
@@ -124,21 +133,19 @@ for ($i = 1; $i <= $x->query("//*/div[@class='nd__filter--list js-filtersList bx
 
 				$links = "https://reg.megabitcomp.ru".$xpath->query($xpath_product_link)->item($j)->getAttribute("href");
 				$brands = $b;
-				$categories = "Мобильная связь и телефония/".mb_convert_encoding($brands, 'windows-1252', 'UTF-8');//str_replace("Каталог товаров/", "", mb_convert_encoding(preg_replace( "/\s{2,}/", "", $xpath->query($xpath_product_category)->item(0)->textContent), 'windows-1252', 'UTF-8'))
-				$categories_url = "mobilnaya-svyaz-i-telefoniya-mobilnye-telefony-smartfony/".strtolower(Func::translitIt($brands));
+				$categories = $cat_str.mb_convert_encoding($brands, 'windows-1252', 'UTF-8');//str_replace("Каталог товаров/", "", mb_convert_encoding(preg_replace( "/\s{2,}/", "", $xpath->query($xpath_product_category)->item(0)->textContent), 'windows-1252', 'UTF-8'))
+				$categories_url = $cat_url.strtolower(Func::translitIt($brands));
 				$title = preg_replace( "/\s{2,}/", "", mb_convert_encoding($xpath->query($xpath_product_link)->item($j)->nodeValue, 'windows-1252', 'UTF-8'));
 				$price = preg_replace( "/\s{2,}р./", "", mb_convert_encoding($xpath->query($xpath_price)->item($j)->nodeValue, 'windows-1252', 'UTF-8'));
 				$articul = preg_replace( "/Артикул: /", "", mb_convert_encoding($xpath->query($xpath_product_articul)->item($j)->nodeValue, 'windows-1252', 'UTF-8'));		
 				$src = preg_replace( "/resize\/223x170\//", "", $xpath->query($xpath_img)->item($j)->getAttribute("src"));		
 				$src = preg_replace( "/https\:\/\/office.megabitcomp.ru\/megabit_pic\/[0{4,}\-?]{5,}\.jpg$/", "70_no-img.jpg", $src);	
 				$main_img = $src;	
-				$csv->setCSV(array(mb_convert_encoding("$links~$brands~$categories~$categories_url~$title~$price~$articul~$main_img", 'windows-1251', 'UTF-8')));
+				$test->setCSV(array(mb_convert_encoding("$links~$brands~$categories~$categories_url~$title~$price~$articul~$main_img", 'windows-1251', 'UTF-8')));
 				
 				print_r($title."\n");
 			}
 		}
 	}
 }
-
-exec (__DIR__ . DIRECTORY_SEPARATOR .'test2.php');
 ?>
