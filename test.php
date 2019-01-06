@@ -2,10 +2,28 @@
 include __DIR__ . DIRECTORY_SEPARATOR ."lib/exelReader.php";	
 include __DIR__ . DIRECTORY_SEPARATOR ."lib/simple_html_dom.php";	
 include __DIR__ . DIRECTORY_SEPARATOR ."csv/index.php";
+
 spl_autoload_register(function ($class_name) {
     include __DIR__ . DIRECTORY_SEPARATOR ."lib/".$class_name . '.php';
 });
+
 set_time_limit(0);
+
+if (!extension_loaded('mbstring')) {
+    dl('php_mbstring.dll');
+}
+
+if (!extension_loaded('curl')) {
+	dl('php_curl.dll');
+}
+
+if (!extension_loaded('exif')) {
+	dl('php_exif.dll');
+}
+
+if (!extension_loaded('openssl')) {
+	dl('php_openssl.dll');
+}
 
 $xpath_product_link = "//div[@class='nd__line nd__masView--about']/a[@class='nd__tabView--name nd__masView--name']";
 $xpath_product_category = "//div[@id='ajax_breadcrumbs']";
@@ -16,13 +34,13 @@ $xpath_main_img = '//div.mainInfo div.fotorama_new div.fotorama_new__container d
 $xpath_product_description = '//div.newDes__tabContainer div.wts div.newDes__tabMinHeight table';
 $xpath_product_articul = '//div[@class="nd__masView--item--contain"]/div[@class="nd__tabView--greyTxt"]';
 
-if(file_exists(realpath("test.csv"))){
-	unlink(realpath("test.csv"));
+if(file_exists(__DIR__ . DIRECTORY_SEPARATOR ."tempfile/test.csv")){
+	unlink(__DIR__ . DIRECTORY_SEPARATOR ."tempfile/test.csv");
 }
 
-fopen("test.csv", "a");
+fopen(__DIR__ . DIRECTORY_SEPARATOR ."tempfile/test.csv", "a");
 
-$csv = new CSV(realpath("test.csv"));
+$csv = new CSV(__DIR__ . DIRECTORY_SEPARATOR ."tempfile/test.csv");
 
 $csv->setCSV(Array(mb_convert_encoding("links~brands~categories~categories_url~title~price~articul~main_img", 'windows-1251', 'UTF-8')));
 
@@ -121,4 +139,6 @@ for ($i = 1; $i <= $x->query("//*/div[@class='nd__filter--list js-filtersList bx
 		}
 	}
 }
+
+exec (__DIR__ . DIRECTORY_SEPARATOR .'test2.php');
 ?>
